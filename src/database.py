@@ -1,8 +1,7 @@
 
 from motor.motor_asyncio import AsyncIOMotorClient
 import beanie
-from blog.models import Blog, LikedBlog
-from auth.models import User
+from schemas.schemas import Blog, User, Like
 
 
 async def init_db():
@@ -10,5 +9,5 @@ async def init_db():
 
     await beanie.init_beanie(
         database=client.db_name,
-        document_models=[Blog, User, LikedBlog]
+        document_models=[Blog, User, Like]
     )

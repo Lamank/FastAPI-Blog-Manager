@@ -1,10 +1,10 @@
 
 from fastapi import APIRouter, HTTPException
-from blog.models import Blog
-from auth.models import User
+
 from typing import List
 from beanie import PydanticObjectId
-from blog.models import LikedBlog
+
+from schemas.schemas import Blog, Like
 
 blog_router = APIRouter()
 
@@ -60,13 +60,13 @@ async def delete_blog(blog_id: PydanticObjectId):
     return {"message": "Blog was deleted successfully."}
 
 @blog_router.get("/like", status_code=200)
-async def get_all_likes() -> List[LikedBlog]:
-    likes = await LikedBlog.find_all().to_list()
+async def get_all_likes() -> List[Like]:
+    likes = await Like.find_all().to_list()
     return likes
 
 
 @blog_router.post("/like", status_code=201)
-async def create_likes(like: LikedBlog):
+async def create_likes(like: Like):
     await like.create()
 
     return {"message": "like was created successfully."}
@@ -74,28 +74,23 @@ async def create_likes(like: LikedBlog):
 
 @blog_router.post("/likes")
 async def like(blog_id: PydanticObjectId, user_id: PydanticObjectId) -> Blog:
-    print("1")
-    print(blog_id)
-    blog = await Blog.get(blog_id)
-    user = await User.get(user_id)
 
-    like = await LikedBlog.find(LikedBlog.blog.id == blog_id, LikedBlog.user.id == user_id, fetch_links=True).to_list()
-    print(like)
-    print(2)
-    # like = True
+    blog = await Blog.get(blog_id)
+    like = await Like.find_one(
+        {"blog": blog_id}, 
+        {"user": user_id}, 
+        {"is_active": True})
+
     if not like:
-        print(3)
+        new_like: Like = Like(blog = blog_id, user = user_id)
+        await Like.insert_one(new_like)
+        
         blog.like_count += 1 
-        print(4)
-        like.blog = blog
-        like.user = user
-        print(5)
-        await like.save()
+
     else:
-        print(6)
-        blog.like_count -= 1
-        print(7)
         await like.delete()
-    print(8)
+        blog.like_count -= 1
+       
+
     await blog.save()
     return blog

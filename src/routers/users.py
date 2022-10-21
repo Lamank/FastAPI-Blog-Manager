@@ -1,6 +1,6 @@
 
-from fastapi import APIRouter, HTTPException
-from auth.models import User
+from fastapi import APIRouter
+from schemas.schemas import User
 from typing import List
 
 user_router = APIRouter()
