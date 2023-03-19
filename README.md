@@ -17,4 +17,4 @@ This is a simple CRUD app for blogs
 
 
 ## Celery
-At the end of the day, blog likes are reset with "Celery".
+At the end of the day, blog likes will reset with "Celery".
